@@ -1,0 +1,57 @@
+﻿@model RS1_Ispit_asp.net_core.ViewModels.IndexVM
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Takmicenja</h2>
+<div class="row">
+    <form class="form  col-md-4 col-sm-4">
+        <div class="form-group">
+            <label for="@Model.Skole">Skola</label>
+            <select asp-for="@Model.SkolaId" asp-items="@Model.Skole.Select(s => new SelectListItem {Value = s.Id.ToString(), Text = s.Naziv })" class="form-control">
+            </select>
+        </div>
+        <div class="form-group ">
+            <label for="@Model.Razredi">Razred</label>
+            <select asp-for="@Model.Razred" asp-items="@Model.Razredi.Select(s => new SelectListItem {Value = s.ToString(), Text = s.ToString() })" class="form-control">
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="button" id="prikazi" class="btn btn-primary form-control" value="Prikaži" />
+        </div>
+    </form>
+</div>
+<div id="takmicenja">
+
+</div>
+<input type="button"  id="dodajTakmicenje" class="btn btn-primary" value="Dodaj" />
+<div id="takmicenjeForma">
+
+</div>
+<script>
+
+
+    $("#prikazi").click(function () {
+        var skolaId = $("#SkolaId").find(":selected").val();
+        var razredId = $("#Razred :selected").val();
+        $.ajax({
+            url: "/Takmicenje/Takmicenja?SkolaId=" + skolaId + "&RazredId=" + razredId,
+            type: "GET",
+            success: function (result) {
+                $("#takmicenja").html(result);
+            }
+        });
+    });
+
+    $("#dodajTakmicenje").click(function () {
+        var skolaId = $("#SkolaId").find(":selected").val();
+        $.ajax({
+            url: "/Takmicenje/DodajTakmicenje?SkolaId=" + skolaId,
+            type: "GET",
+            success: function (result) {
+                $("#takmicenjeForma").html(result);
+            }
+        });
+    });
+</script>

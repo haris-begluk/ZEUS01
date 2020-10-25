@@ -51,12 +51,12 @@ namespace RS1_Ispit_asp.net_core
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            
 
-            
+
+
 
         }
 
-       
+
     }
 }
