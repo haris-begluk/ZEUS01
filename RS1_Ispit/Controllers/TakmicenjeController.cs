@@ -88,7 +88,7 @@ namespace RS1_Ispit_asp.net_core.Controllers
         }
 
         [HttpPost]
-        public void DodajTakmicenje(DodajTakmicenjeVM obj)
+        public IActionResult DodajTakmicenje(DodajTakmicenjeVM obj)
         {
             var model = new Takmicenje
             {
@@ -98,8 +98,96 @@ namespace RS1_Ispit_asp.net_core.Controllers
                 Zakljucaj = false,
                 Razred = _context.Predmet.FirstOrDefault(p => p.Id.Equals(obj.PredmetId)).Razred
             };
-            _context.Takmicenja.Add(model);
+            var takmicenje = _context.Takmicenja.Add(model);
+            var ucenici = _context.DodjeljenPredmet.Include(o => o.OdjeljenjeStavka).ThenInclude(i => i.Odjeljenje).Include(i => i.Predmet)
+                    .Where(dp => dp.ZakljucnoKrajGodine == 5 && dp.OdjeljenjeStavka.Odjeljenje.SkolaID == takmicenje.Entity.SkolaId && dp.Predmet.Id.Equals(takmicenje.Entity.PredmetId))
+                    .Select(s => new { s.OdjeljenjeStavka.Id, s.OdjeljenjeStavka.UcenikId });
+            foreach (var ucenik in ucenici)
+            {
+                if (UcenikProsjek(ucenik.UcenikId))
+                    _context.TakmicenjeStavke.Add(new TakmicenjeStavka
+                    {
+                        TakmicenjeId = takmicenje.Entity.Id,
+                        OdjeljenjeStavkaId = ucenik.Id,
+                        Pristupio = true,
+                        Bodovi = 0
+                    });
+            }
+
             _context.SaveChanges();
+            return RedirectToAction(nameof(Takmicenja), new { obj.SkolaId, razredId = model.Razred });
+        }
+
+        public IActionResult TakmicenjeRezultati(int id)
+        {
+            var model = _context.Takmicenja.Where(t => t.Id.Equals(id)).Select(s => new RezultatiVM
+            {
+                TakmicenjeId = id, 
+                Zakljucaj= s.Zakljucaj,
+                Skola = s.Skola.Naziv,
+                Predmet = s.Predmet.Naziv,
+                Razred = s.Razred,
+                Datum = s.Datum
+            }).FirstOrDefault();
+
+            model.Rezultati = _context.TakmicenjeStavke.Include(i => i.OdjeljenjeStavka).ThenInclude(i => i.Odjeljenje)
+                .Where(r => r.TakmicenjeId.Equals(model.TakmicenjeId)).Select(s => new Rezultat
+                { 
+                    TakmicenjeStavkaId = s.Id,
+                    UcesnikId = s.OdjeljenjeStavka.UcenikId,
+                    Odjeljenje = s.OdjeljenjeStavka.Odjeljenje.Oznaka,
+                    BrojUDnevniku = s.OdjeljenjeStavka.BrojUDnevniku,
+                    Pristupio = s.Pristupio,
+                    Bodovi = s.Bodovi
+                }).ToList();
+            return View(model);
+        }
+        public void Pristupio(int id) {
+
+            var obj = _context.TakmicenjeStavke.FirstOrDefault(a => a.Id.Equals(id));
+            obj.Pristupio = !obj.Pristupio;
+            _context.SaveChanges();
+        }
+
+        public void Zakljucaj(int id)
+        {
+            var obj = _context.Takmicenja.FirstOrDefault(a => a.Id.Equals(id));
+            obj.Zakljucaj = !obj.Zakljucaj;
+            _context.SaveChanges();
+        } 
+        public void EditBodovi(int Id, int bodovi)
+        {
+            var obj = _context.TakmicenjeStavke.FirstOrDefault(o => o.Id.Equals(Id));
+            obj.Bodovi = bodovi;
+            _context.SaveChanges();
+        }
+        public IActionResult UrediRezultat(int id)
+        {
+            var model = new UcesnikEditVM
+            {
+                TakmicenjeStavkaId = id, 
+                Ucesnici = _context.TakmicenjeStavke.Include(i => i.OdjeljenjeStavka).ThenInclude(i => i.Ucenik)
+                .Select(s => new UcesnikVM {
+                TakmicenjeStavkaId = s.Id,
+                Text = s.OdjeljenjeStavka.Odjeljenje.Oznaka+" - "+s.OdjeljenjeStavka.Ucenik.ImePrezime +" - "+ s.OdjeljenjeStavka.BrojUDnevniku.ToString()
+                }).ToList(), 
+                Bodovi = _context.TakmicenjeStavke.FirstOrDefault(d => d.Id.Equals(id)).Bodovi
+                
+            };
+            return PartialView("UrediRezultatPartial", model);
+        }
+        public void UpsertRezultat(UcesnikEditVM model)
+        {
+            var obj = _context.TakmicenjeStavke.FirstOrDefault(t => t.Id.Equals(model.TakmicenjeStavkaId));
+            obj.Bodovi = model.Bodovi;
+            _context.SaveChanges();
+            
+        }
+        //Dodatne Metode Helperi
+        private bool UcenikProsjek(int id)
+        {
+            var prosjek = _context.DodjeljenPredmet.Include(i => i.OdjeljenjeStavka).Where(o => o.OdjeljenjeStavka.UcenikId.Equals(id)).Average(o => o.ZakljucnoKrajGodine);
+            if (prosjek >= 4) return true; return false;
         }
     }
 }

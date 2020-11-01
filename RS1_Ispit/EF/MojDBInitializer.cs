@@ -138,7 +138,46 @@ namespace RS1_Ispit_asp.net_core.EF
             context.PredajePredmet.AddRange(predajePredmete);
             context.Nastavnik.AddRange(nastavnici);
             context.DodjeljenPredmet.AddRange(dodjeljenPredmet);
-            context.SaveChanges();
+            context.SaveChanges(); 
+            //TODO:Dodati TAKMICENJA
+            var skoleC = context.Skola.ToList();
+            foreach (var item in skoleC)
+            {
+                var pred = context.Predmet;
+                var takmicenja = new List<Takmicenje>();
+                var takmicenjeUcesnik = new List<TakmicenjeStavka>();
+                for (int j = 0; j < pred.Count(); j++)
+                {
+                    var predmet = pred.ToList().MyRandom();
+                    takmicenja.Add(new Takmicenje
+                    {
+                        SkolaId = item.Id,
+                        PredmetId = predmet.Id,
+                        Datum = DateTime.Now,
+                        Razred = predmet.Razred,
+                        Zakljucaj = false
+                    });
+                }
+                context.Takmicenja.AddRange(takmicenja);
+                context.SaveChanges();
+
+                var odje = context.OdjeljenjeStavka.ToList();
+                var takm = context.Takmicenja.ToList();
+                for (int i = 0; i < 50; i++)
+                {
+                    takmicenjeUcesnik.Add(new TakmicenjeStavka
+                    {
+                        TakmicenjeId = takm.MyRandom().Id,
+                        OdjeljenjeStavkaId = odje.MyRandom().Id,
+                        Pristupio = new List<bool> { true, false }.MyRandom(),
+                        Bodovi = MyRandomExtensions.RandomBodova()
+
+                    });
+                }
+                context.TakmicenjeStavke.AddRange(takmicenjeUcesnik);
+                context.SaveChanges();
+                //Task.Delay(10000).Wait();
+            }
         }
 
        
@@ -166,6 +205,13 @@ namespace RS1_Ispit_asp.net_core.EF
             int x = random.Next(1, 15);
             if (x > 1)
                 x = x % 4 + 2;
+            return x;
+        }
+        public static int RandomBodova()
+        {
+            int x = random.Next(1, 100);
+            //if (x > 30 && x < 70)
+            //    return 0;
             return x;
         }
     }

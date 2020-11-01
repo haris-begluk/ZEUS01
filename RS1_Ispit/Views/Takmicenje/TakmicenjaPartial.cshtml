@@ -1,0 +1,40 @@
+﻿@model RS1_Ispit_asp.net_core.ViewModels.IndexVM
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th> 
+                Skola
+            </th>
+            <th> 
+                Razred
+            </th>
+            <th>Datum</th>
+            <th>Predmet</th>
+            <th>Najbolji ucesnik(skola | Odjeljenja |Ime i Prezime)</th>
+            <th>Akcija</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Data) {
+        <tr>
+            <td>
+               @item.Skola
+            </td>
+            <td> 
+                @item.Razred
+            </td> <td> 
+                @item.Datum
+            </td> <td> 
+                @item.Predmet
+            </td> <td> 
+                @item.NajboljiUcenik
+            </td>
+            <td>
+                <a href="/Takmicenje/TakmicenjeRezultati?id=@item.TakmicenjeId" style="text-decoration:none;">Rezultati</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

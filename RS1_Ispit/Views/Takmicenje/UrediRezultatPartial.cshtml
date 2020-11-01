@@ -1,0 +1,22 @@
+﻿@model RS1_Ispit_asp.net_core.ViewModels.UcesnikEditVM
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<div class="row">
+    <form class="form  col-md-4 col-sm-4" ajax-poziv='da' action="/Takmicenje/UpsertRezultat" ajax-rezultat="NO">
+        <div class="form-group ">
+            <label for="@Model.TakmicenjeStavkaId">Ucesnik</label>
+            <select asp-for="@Model.TakmicenjeStavkaId" asp-items="@Model.Ucesnici.Select(s => new SelectListItem {Value = s.TakmicenjeStavkaId.ToString(), Text =s.Text  })" class="form-control">
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="@Model.Bodovi">Bodovi</label>
+            <input type="number" asp-for="@Model.Bodovi" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <input type="submit"  class="btn btn-primary form-control" value="Snimi" />
+        </div>
+    </form>
+</div>

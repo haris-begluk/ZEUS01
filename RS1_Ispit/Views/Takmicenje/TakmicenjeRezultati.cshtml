@@ -1,0 +1,111 @@
+﻿@model RS1_Ispit_asp.net_core.ViewModels.RezultatiVM
+
+@{
+    ViewData["Title"] = "TakmicenjeRezultati";
+}
+
+<h2>Takmicenje Rezultati</h2>
+<div class="form col-md-4 col-sm-4">
+    <div class="form-group">
+        <label>Skola Domacin</label>
+        <input type="text" value="@Model.Skola" class="form-control" readonly style="font-weight:bold;" />
+    </div>
+    <div class="form-group">
+        <label>Predmet</label>
+        <input type="text" value="@Model.Predmet" class="form-control" readonly style="font-weight:bold;" />
+    </div>
+    <div class="form-group">
+        <label>Razred</label>
+        <input type="text" value="@Model.Razred.ToString()" class="form-control" readonly style="font-weight:bold;" />
+    </div>
+    <div class="form-group">
+        <label>Datum</label>
+        <input type="text" value="@Model.Datum.ToString("dd.MM.yyyy")" class="form-control" readonly style="font-weight:bold;" />
+    </div>
+    <button id="zakljucaj"  ajax-poziv='da' ajax-url="/Takmicenje/Zakljucaj?id=@Model.TakmicenjeId"
+            ajax-rezultat="none" class="btn @(Model.Zakljucaj?"btn-danger":"btn-primary")">@(Model.Zakljucaj?"Otkljucaj":"Zakljucaj")</button>
+</div>
+
+<table id="rezultati" class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                Odjeljenje
+            </th>
+            <th>
+                Broj u dnevniku
+            </th>
+            <th>
+                Pristupio
+            </th>
+            <th>
+                Rezultat bodovi(max 100)
+            </th>
+            <th>
+                Akcija
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Rezultati)
+        {
+            <tr>
+                <td>
+                    @item.Odjeljenje
+                </td>
+                <td>
+                    @item.BrojUDnevniku
+                </td>
+                <td>
+                    <a class="pristupio" ajax-poziv='da' href="/Takmicenje/Pristupio?id=@item.TakmicenjeStavkaId" ajax-rezultat="none"
+                       style="text-decoration:none; @(Model.Zakljucaj?"pointer-events:none;":"") color:white; background-color:@(item.Pristupio?"Green":"Red")">@(item.Pristupio?"DA":"NE")</a>
+                </td>
+                <td>
+                    @if (item.Bodovi != null)
+                    {
+                        <input class="bodovi" style="@(Model.Zakljucaj?"pointer-events:none;":"")" id="@item.TakmicenjeStavkaId" type="number" min="0" max="100" @(Model.Zakljucaj ? "readonly" : "") value="@item.Bodovi" />
+
+                    }
+                    else
+                    {
+                        <span>X</span>
+                    }
+                </td>
+
+                <td>
+                    @if (item.Bodovi != null)
+                    {
+                        <a ajax-poziv='da' href="/Takmicenje/UrediRezultat?id=@item.TakmicenjeStavkaId" ajax-rezultat="rezultat">Uredi</a>
+
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div id="rezultat"></div> 
+<script>
+    $(".pristupio").mouseup(function () {
+        setTimeout(function () {
+            window.location.reload();
+        }, 500);
+    }); 
+    $("#zakljucaj").mouseup(function () {
+        setTimeout(function () {
+            window.location.reload();
+        }, 1000);
+    });
+    $(".bodovi").keyup(function (event) {
+        setTimeout(function () {
+            if (event.target.value < 100 && event.target.value > 0) {
+                $.ajax({
+                    type: "GET",
+                    url: "/Takmicenje/EditBodovi?id=" + event.target.id + "&bodovi=" + event.target.value,
+                    success: function () {
+                        window.location.reload();
+                    }
+                });
+            }  
+            }, 1000);
+    }); 
+</script>

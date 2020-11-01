@@ -14,6 +14,27 @@ Zatim pregledati koja neophodna polja data klasa treba sadrzavat.
 3. Dodati DeleteBehavior.Restrict za date tabele
 ==========================================================================================================================
 ==========================================================================================================================
+ $("a[ajax-poziv='da']").blur(function (event) {
+        setTimeout(function () {
+            $.get("/Takmicenje/TakmicenjaRezultati?id=@Model.TakmicenjeId", function (data, status) {
+                $(window).html(data); 
+            location.reload(true);
+        });
+        }, 1000);
+
+    });
+
+
+ $("a .pristupio").mouseup(function (event) {
+        setTimeout(function () {
+            console.log("================================");
+            $.get("/Takmicenje/TakmicenjaRezultati?id=@Model.TakmicenjeId", function (data, status) {
+                $(window).html(data);
+            location.reload(true);
+        });
+        }, 1000);
+
+    });
 ==========================================================================================================================
 ==========================================================================================================================
 ==========================================================================================================================

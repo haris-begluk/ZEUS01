@@ -13,7 +13,7 @@ namespace RS1_Ispit_asp.net_core.EntityModels
         public int OdjeljenjeStavkaId { get; set; }
         public OdjeljenjeStavka OdjeljenjeStavka { get; set; }
         //DODATNA POLJA
-        public bool Pristupio { get; set; }
-        public int Bodovi { get; set; }
+        public bool Pristupio { get; set; } 
+        public int? Bodovi { get; set; }
     }
 }
